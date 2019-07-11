@@ -1,6 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title><![CDATA[BUUCTFwp整理]]></title>
+    <url>%2F2019%2F07%2F11%2FBUUCTFwp%E6%95%B4%E7%90%86%2F</url>
+    <content type="text"><![CDATA[首先必须陈述的事这些题目有点猛，不太顶得住，所以wp基本是网上看来的。web1：Warmup先看源码，发现了source.php打开跟进。 &lt;?php highlight_file(FILE); class emmm { public static function checkFile(&amp;$page) { $whitelist = [“source”=&gt;”source.php”,”hint”=&gt;”hint.php”]; if (! isset($page) || !is_string($page)) { echo “you can’t see it”; return false; } if (in_array($page, $whitelist)) { return true; } $_page = mb_substr( $page, 0, mb_strpos($page . &apos;?&apos;, &apos;?&apos;) ); if (in_array($_page, $whitelist)) { return true; } $_page = urldecode($page); $_page = mb_substr( $_page, 0, mb_strpos($_page . &apos;?&apos;, &apos;?&apos;) ); if (in_array($_page, $whitelist)) { return true; } echo &quot;you can&apos;t see it&quot;; return false; } } if (! empty($_REQUEST[&apos;file&apos;]) &amp;&amp; is_string($_REQUEST[&apos;file&apos;]) &amp;&amp; emmm::checkFile($_REQUEST[&apos;file&apos;]) ) { include $_REQUEST[&apos;file&apos;]; exit; } else { echo &quot;&lt;br&gt;&lt;img src=\&quot;https://i.loli.net/2018/11/01/5bdb0d93dc794.jpg\&quot; /&gt;&quot;; } ?&gt; 首先它设置了一个白名单数组，如果判定不是这里面的估计就是凉吧，继续往下看。mb_substr()是用来截取的，在这里的用途，我一开始没看懂，定睛看了n眼，觉得应该是用来截取？前面的内容然后叫他_page。好了，咱懂了，这不就是怕咱用二级目录绕么。继续看下面的规则，传入的变量不能为空（它仿佛在说屁话）。然后他要是个字符串，还要满足上面的白名单规则。如果都满足就可以包含出那个文件了。hint.php里面给了文件名，猜测应该是根目录下吧。要求target在数组whitelist就会返回true再看看下一个：这里面对target做了判断，因为可能后面有？（主要应对?target=index.php?id=1这种情况，这也是漏洞的成因）,可以传参数，于是将?前的东西都取出来判断，看看是否在 whitelist就会返回true再看看下一个：下面一个意思一样，只是将$target先解码一下。 综上我们要求，target不为空、是字符串、不在黑名单中、且经过切割后再白名单中。。这里面涉及一个知识:双重编码，比如你将?双重编码的话，经过包含时你包含的文件会被当成一个目录：事实上，确实在根目录下的ffffllllaaaagggg里面。 payload: http://web5.buuoj.cn/?file=hint.php%253F/../../../../ffffllllaaaagggg（这里的hint.php换成source。php一样可行，只要绕过白名单即可） web2：随便注这题整得我半死，总想着什么方法去绕过过滤，还是我太天真了。都说随便注了我还想着绕过。弟弟行为！也没给啥源码提示，就说这个一次真实的渗透测试得到的。真装X，我以后当大哥出题也要这样搞。网上一些说order by能列出行…可能是我太菜，反正我没列出来，反正也没锤子用。用 union select会直接跳出一个 return preg_match(“/select|update|delete|drop|insert|where|./i”,$inject);心凉了，套他猴子的，这还给不给玩了。放弃，还是百度好。看了带哥的解法，原地鼓掌，反正是学到了。 带哥原话“首先这道题仅仅是过滤了一些基本关键词“ 但是对堆叠注入没有任何的检查，并且他这里面是将Mysql查询返回的结果以数组的形式返回，也就是说没有限制回显的多少。我们先用 show tables; 和 desc xxx; 收集表名以及表的结构”我这里还有个问题，为什么这个show tables不用指定数据库就可以查呢？是列出所有数据库所有表？？不明白然后下面只有一个strstr（），直接用大小写绕过就成了。稳如母狗的做出来了。带哥payload：http://web16.buuoj.cn/?inject=1%27;SeT@a=0x73656c656374202a2066726f6d20603139313938313039333131313435313460;prepare%20execsql%20from%20@a;execute%20execsql; 关于堆叠注入和存储过程，这里p上带哥的详解https://blog.csdn.net/weixin_37839711/article/details/81562550 以备日后查找。]]></content>
+      <categories>
+        <category>ctfwp</category>
+      </categories>
+      <tags>
+        <tag>安全</tag>
+      </tags>
+  </entry>
+  <entry>
     <title><![CDATA[A drifter]]></title>
     <url>%2F2019%2F07%2F09%2F%E5%BE%88%E6%83%B3%E5%A5%B9%2F</url>
     <content type="text"><![CDATA[我认为最深沉的爱 ，莫过于你离开以后 ，我活成了你的样子。 我喜欢一株植物，就像我一样，没有根]]></content>
